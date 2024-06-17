@@ -1,36 +1,25 @@
-const express = require("express");
-const axios = require("axios");
+const express = require('express');
+const axios = require('axios');
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = 3000;
 
-const apiNinjasKey = "Ot28mMZlv6k4ttzYvKAA0Q==gsjSjZUAsL2qGe3O"; // Replace with your API Ninjas key
+const apiKey = 'Ot28mMZlv6k4ttzYvKAA0Q==gsjSjZUAsL2qGe3O'; // Replace with your API key from API Ninjas
 
-app.get('/carinfo', async (req, res) => {
-  const model = req.query.model || '';
+app.get('/generate-password', async (req, res) => {
+    const length = req.query.length || 10; // Default length is 10 if not specified
 
-  if (!model) {
-    return res.status(400).json({ error: 'Model parameter is required' });
-  }
+    try {
+        const response = await axios.get(`https://api.api-ninjas.com/v1/passwordgenerator?length=${length}`, {
+            headers: { 'X-Api-Key': apiKey }
+        });
 
-  try {
-    const response = await axios.get(`https://api.api-ninjas.com/v1/cars?model=${model}`, {
-      headers: { 'X-Api-Key': apiNinjasKey }
-    });
-    
-    if (response.data.length === 0) {
-      return res.status(404).json({ error: 'No cars found for the given model' });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to generate password' });
     }
-
-    return res.json(response.data);
-  } catch (err) {
-    const errorMessage = err.response?.data?.error || err.message || 'Unknown error';
-    return res.status(500).json({
-      error: 'An error occurred: ' + errorMessage
-    });
-  }
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
 });
